@@ -120,32 +120,44 @@
   </div>
 </footer>
 
+<!-- Details modal -->
+<div id="details-modal" class="hidden fixed inset-0 z-[100] bg-black bg-opacity-70 flex items-center justify-center p-4" onclick="if(event.target===this) closeDetails()">
+  <div class="bg-[#1e1e1e] border border-[#2d2d2d] rounded-2xl max-w-lg w-full p-6 relative max-h-[85vh] overflow-y-auto">
+    <button onclick="closeDetails()" class="absolute top-4 right-4 text-[#a3a3a3] hover:text-white">
+      <svg fill="none" height="22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="22" xmlns="http://www.w3.org/2000/svg">
+        <path d="M18 6 6 18"></path><path d="m6 6 12 12"></path>
+      </svg>
+    </button>
+    <div id="details-body"></div>
+  </div>
+</div>
+
 <script>
 // ---------- DATA (this is your "database" — just a JS array, no server) ----------
 // Real, verified Bengaluru businesses — actual coordinates and phone
 // numbers, all within one city so GPS distance-sorting is meaningful.
 // Descriptions written independently, not copied from review text.
 const PROVIDERS = [
-  { id:1, name:"Rupachandra Plumbing Services", category:"Plumbing", description:"Home plumbing repairs, fittings, and bathroom tile work.", rating:5, reviews:454, location:"BTM Layout 2nd Stage, Bengaluru", phone:"+91 99807 98772", icon:"wrench", lat:12.9084444, lng:77.613169 },
-  { id:2, name:"DK Plumbing Service", category:"Plumbing", description:"Round-the-clock plumbing service for leaks, fittings, and repairs.", rating:5, reviews:384, location:"Banashankari, Bengaluru", phone:"+91 81441 30198", icon:"wrench", lat:12.9345241, lng:77.5556016 },
-  { id:3, name:"CTG Plumbing & Sanitary Works", category:"Plumbing", description:"Sanitary fittings, shower and faucet installation, tap repair.", rating:5, reviews:278, location:"Nagavara, Bengaluru", phone:"+91 98458 50597", icon:"wrench", lat:13.0443359, lng:77.6248736 },
-  { id:4, name:"Planet Electricals", category:"Electrical", description:"Electrician network covering wiring, repairs, and installations.", rating:5, reviews:1058, location:"J. P. Nagar, Bengaluru", phone:"+91 91108 19125", icon:"bolt", lat:12.9005929, lng:77.5884972 },
-  { id:5, name:"Krupa Electrician", category:"Electrical", description:"Home electrical repairs, inverter and geyser servicing.", rating:5, reviews:638, location:"Electronic City, Bengaluru", phone:"+91 95059 62723", icon:"bolt", lat:12.8580871, lng:77.675405 },
-  { id:6, name:"Kannika Electricals", category:"Electrical", description:"Switch, wiring, and socket repair with quick response times.", rating:5, reviews:74, location:"Sampangi Rama Nagara, Bengaluru", phone:"+91 76768 62585", icon:"bolt", lat:12.9630501, lng:77.5905513 },
-  { id:7, name:"Carpenter & Woodwork Services", category:"Carpentry", description:"Custom modular kitchens, wardrobes, and furniture woodwork.", rating:5, reviews:17, location:"C V Raman Nagar, Bengaluru", phone:"+91 90056 19995", icon:"layout", lat:12.9894455, lng:77.6657474 },
-  { id:8, name:"MS Carpentry Works", category:"Carpentry", description:"Interior decor and carpentry work with in-house finishing.", rating:5, reviews:29, location:"Nagarbhavi, Bengaluru", phone:null, icon:"layout", lat:12.9756006, lng:77.5263211 },
-  { id:9, name:"RK Cooling System", category:"HVAC", description:"AC repair, installation, and annual maintenance contracts.", rating:5, reviews:15, location:"J. P. Nagar, Bengaluru", phone:"+91 63625 99455", icon:"snowflake", lat:12.9030392, lng:77.5688055 },
-  { id:10, name:"Windsor Cooling System", category:"HVAC", description:"AC repair, gas refilling, cleaning, and new installations.", rating:5, reviews:44, location:"RT Nagar, Bengaluru", phone:"+91 78990 99094", icon:"snowflake", lat:13.0332629, lng:77.6015069 },
-  { id:11, name:"AapkaPainter Bengaluru", category:"Painting", description:"Home painting with color consultation and project supervision.", rating:5, reviews:4107, location:"Bellandur, Bengaluru", phone:"+91 80887 77173", icon:"home", lat:12.9239742, lng:77.6675882 },
-  { id:12, name:"ThePaintDecorators", category:"Painting", description:"Interior and exterior painting with catalog-based color options.", rating:5, reviews:791, location:"Jayanagar, Bengaluru", phone:"+91 89519 02694", icon:"home", lat:12.927188, lng:77.592862 },
-  { id:13, name:"Clean Fanatic", category:"Cleaning", description:"Deep home cleaning covering kitchens, bathrooms, and every surface.", rating:5, reviews:18204, location:"HSR Layout, Bengaluru", phone:"+91 87222 72777", icon:"target", lat:12.9099143, lng:77.6624614 },
-  { id:14, name:"Homecare Solutions", category:"Cleaning", description:"Home, office, and kitchen deep-cleaning service.", rating:5, reviews:2610, location:"Domlur, Bengaluru", phone:"+91 91483 34580", icon:"target", lat:12.9600295, lng:77.6384007 },
-  { id:15, name:"BTM Key Makers and Lock Repair", category:"Locksmith", description:"Emergency key making and lock repair, fast response.", rating:5, reviews:240, location:"BTM 1st Stage, Bengaluru", phone:"+91 98962 00480", icon:"lock", lat:12.92294, lng:77.614208 },
-  { id:16, name:"KEY MAKERS", category:"Locksmith", description:"Key duplication and lock-out assistance for homes and vehicles.", rating:5, reviews:478, location:"Koramangala, Bengaluru", phone:"+91 95911 42718", icon:"lock", lat:12.9219603, lng:77.6215917 },
-  { id:17, name:"Bangalore Waterproofing Co", category:"Roofing", description:"Terrace and roof waterproofing solutions for homes.", rating:5, reviews:114, location:"Mangammanapalya, Bengaluru", phone:"+91 74834 26093", icon:"search", lat:12.905385, lng:77.6339412 },
-  { id:18, name:"AHAD Waterproofing", category:"Roofing", description:"Terrace waterproofing with fiber-mesh reinforcement techniques.", rating:5, reviews:143, location:"BTM 1st Stage, Bengaluru", phone:"+91 98804 60484", icon:"search", lat:12.9215393, lng:77.6091679 },
-  { id:19, name:"Integrated Pest Control Pvt. Ltd.", category:"Pest Control", description:"Residential pest control and disinfection service.", rating:5, reviews:1263, location:"J. P. Nagar, Bengaluru", phone:"+91 74110 32320", icon:"plus", lat:12.9015401, lng:77.5823745 },
-  { id:20, name:"Home Appliance Repair Bengaluru", category:"Appliance Repair", description:"Washing machine, fridge, and appliance repair at home.", rating:5, reviews:54, location:"Jayanagar, Bengaluru", phone:"+91 90000 06893", icon:"target", lat:12.9395294, lng:77.5692521 },
+  { id:1, name:"Rupachandra Plumbing Services", category:"Plumbing", description:"Home plumbing repairs, fittings, and bathroom tile work.", rating:5, reviews:454, location:"BTM Layout 2nd Stage, Bengaluru", address:"2nd floor, 10th cross, 29th Main Rd, EWS Colony, BTM Layout 2nd Stage, Bengaluru, Karnataka 560076", phone:"+91 99807 98772", icon:"wrench", lat:12.9084444, lng:77.613169 },
+  { id:2, name:"DK Plumbing Service", category:"Plumbing", description:"Round-the-clock plumbing service for leaks, fittings, and repairs.", rating:5, reviews:384, location:"Banashankari, Bengaluru", address:"5 A 13th A cross, 4th Main Rd, near Yallamma Temple, Srinivasnagar, Banashankari, Bengaluru, Karnataka 560085", phone:"+91 81441 30198", icon:"wrench", lat:12.9345241, lng:77.5556016 },
+  { id:3, name:"CTG Plumbing & Sanitary Works", category:"Plumbing", description:"Sanitary fittings, shower and faucet installation, tap repair.", rating:5, reviews:278, location:"Nagavara, Bengaluru", address:"5, 3rd Cross, 1st Main, Shampur, Main Road, Arabic College Post, Gandhinagar, Nagavara, Bengaluru, Karnataka 560045", phone:"+91 98458 50597", icon:"wrench", lat:13.0443359, lng:77.6248736 },
+  { id:4, name:"Planet Electricals", category:"Electrical", description:"Electrician network covering wiring, repairs, and installations.", rating:5, reviews:1058, location:"J. P. Nagar, Bengaluru", address:"15, 1st Cross Rd, Vinayaka Nagar, Nanjundeswara Layout, J P Nagar Phase 5, Bengaluru, Karnataka 560078", phone:"+91 91108 19125", icon:"bolt", lat:12.9005929, lng:77.5884972 },
+  { id:5, name:"Krupa Electrician", category:"Electrical", description:"Home electrical repairs, inverter and geyser servicing.", rating:5, reviews:638, location:"Electronic City, Bengaluru", address:"House no. 24, Mouli Nilaya, Balaji Layout Rd, Silicon Town, Electronic City, Bengaluru, Karnataka 560100", phone:"+91 95059 62723", icon:"bolt", lat:12.8580871, lng:77.675405 },
+  { id:6, name:"Kannika Electricals", category:"Electrical", description:"Switch, wiring, and socket repair with quick response times.", rating:5, reviews:74, location:"Sampangi Rama Nagara, Bengaluru", address:"Sampangi Rama Nagara, Bengaluru, Karnataka 560027", phone:"+91 76768 62585", icon:"bolt", lat:12.9630501, lng:77.5905513 },
+  { id:7, name:"Carpenter & Woodwork Services", category:"Carpentry", description:"Custom modular kitchens, wardrobes, and furniture woodwork.", rating:5, reviews:17, location:"C V Raman Nagar, Bengaluru", address:"124, 14th A Cross, Yelamma Temple Road, Nagavarapalya, C V Raman Nagar, Bengaluru, Karnataka 560093", phone:"+91 90056 19995", icon:"layout", lat:12.9894455, lng:77.6657474 },
+  { id:8, name:"MS Carpentry Works", category:"Carpentry", description:"Interior decor and carpentry work with in-house finishing.", rating:5, reviews:29, location:"Nagarbhavi, Bengaluru", address:"28, 2nd cross, Government Electric Factory, 2nd Main Rd, Vijayanagar North, Nagarbhavi, Bengaluru, Karnataka 560026", phone:null, icon:"layout", lat:12.9756006, lng:77.5263211 },
+  { id:9, name:"RK Cooling System", category:"HVAC", description:"AC repair, installation, and annual maintenance contracts.", rating:5, reviews:15, location:"J. P. Nagar, Bengaluru", address:"12/1, 40 Feet Rd, Fayazabad, Kanka Nagar, J. P. Nagar, Bengaluru, Karnataka 560078", phone:"+91 63625 99455", icon:"snowflake", lat:12.9030392, lng:77.5688055 },
+  { id:10, name:"Windsor Cooling System", category:"HVAC", description:"AC repair, gas refilling, cleaning, and new installations.", rating:5, reviews:44, location:"RT Nagar, Bengaluru", address:"Seethappa Layout, Chamundi Nagar, RT Nagar, Bengaluru, Karnataka 560032", phone:"+91 78990 99094", icon:"snowflake", lat:13.0332629, lng:77.6015069 },
+  { id:11, name:"AapkaPainter Bengaluru", category:"Painting", description:"Home painting with color consultation and project supervision.", rating:5, reviews:4107, location:"Bellandur, Bengaluru", address:"Classic Converge, Sakti Statesman building, Marathahalli - Sarjapur Outer Ring Rd, Green Glen Layout, Bellandur, Bengaluru, Karnataka 560103", phone:"+91 80887 77173", icon:"home", lat:12.9239742, lng:77.6675882 },
+  { id:12, name:"ThePaintDecorators", category:"Painting", description:"Interior and exterior painting with catalog-based color options.", rating:5, reviews:791, location:"Jayanagar, Bengaluru", address:"25th Main Rd, BTB Area, 4th T Block East, Jayanagar, Bengaluru, Karnataka 560041", phone:"+91 89519 02694", icon:"home", lat:12.927188, lng:77.592862 },
+  { id:13, name:"Clean Fanatic", category:"Cleaning", description:"Deep home cleaning covering kitchens, bathrooms, and every surface.", rating:5, reviews:18204, location:"HSR Layout, Bengaluru", address:"9 Harlur Road, Ambalipura - Sarjapur Rd, PWD Quarters, 1st Sector, HSR Layout, Bengaluru, Karnataka 560102", phone:"+91 87222 72777", icon:"target", lat:12.9099143, lng:77.6624614 },
+  { id:14, name:"Homecare Solutions", category:"Cleaning", description:"Home, office, and kitchen deep-cleaning service.", rating:5, reviews:2610, location:"Domlur, Bengaluru", address:"Sri Vinayaka towers No. 292, 2nd floor, 7th Cross Rd, Domlur I Stage, Bengaluru, Karnataka 560071", phone:"+91 91483 34580", icon:"target", lat:12.9600295, lng:77.6384007 },
+  { id:15, name:"BTM Key Makers and Lock Repair", category:"Locksmith", description:"Emergency key making and lock repair, fast response.", rating:5, reviews:240, location:"BTM 1st Stage, Bengaluru", address:"1205, 20th Main, 1st Cross Rd, Old Madiwala, Maruti Nagar, BTM 1st Stage, Bengaluru, Karnataka 560029", phone:"+91 98962 00480", icon:"lock", lat:12.92294, lng:77.614208 },
+  { id:16, name:"KEY MAKERS", category:"Locksmith", description:"Key duplication and lock-out assistance for homes and vehicles.", rating:5, reviews:478, location:"Koramangala, Bengaluru", address:"75/1, Madiwala Rd, opp. canara bank, Old Madiwala, Madiwala 1st Stage, Koramangala, Bengaluru, Karnataka 560068", phone:"+91 95911 42718", icon:"lock", lat:12.9219603, lng:77.6215917 },
+  { id:17, name:"Bangalore Waterproofing Co", category:"Roofing", description:"Terrace and roof waterproofing solutions for homes.", rating:5, reviews:114, location:"Mangammanapalya, Bengaluru", address:"WJ4M+5HG, Mangammanapalya, Bengaluru, Karnataka 560068", phone:"+91 74834 26093", icon:"search", lat:12.905385, lng:77.6339412 },
+  { id:18, name:"AHAD Waterproofing", category:"Roofing", description:"Terrace waterproofing with fiber-mesh reinforcement techniques.", rating:5, reviews:143, location:"BTM 1st Stage, Bengaluru", address:"9, 2nd main, 3rd Cross Rd, opp. SLR's Mark Apartment, Madiwala New Extension, BTM 1st Stage, Bengaluru, Karnataka 560029", phone:"+91 98804 60484", icon:"search", lat:12.9215393, lng:77.6091679 },
+  { id:19, name:"Integrated Pest Control Pvt. Ltd.", category:"Pest Control", description:"Residential pest control and disinfection service.", rating:5, reviews:1263, location:"J. P. Nagar, Bengaluru", address:"24/1, 2nd main, Puttenahalli Rd, JP Nagar 6th Phase, Ashta Laxmi Layout, JP Nagar 7th Phase, Bengaluru, Karnataka 560078", phone:"+91 74110 32320", icon:"plus", lat:12.9015401, lng:77.5823745 },
+  { id:20, name:"Home Appliance Repair Bengaluru", category:"Appliance Repair", description:"Washing machine, fridge, and appliance repair at home.", rating:5, reviews:54, location:"Jayanagar, Bengaluru", address:"Shop no 28, 3rd Block, NR Colony, Jayanagar East, Bengaluru, Karnataka 560004", phone:"+91 90000 06893", icon:"target", lat:12.9395294, lng:77.5692521 },
 ];
 
 const ICONS = {
@@ -213,7 +225,7 @@ function cardMarkup(p) {
         <span>${p.phone || 'Phone not listed — see Google Maps'}</span>
       </div>
       <div class="flex gap-3">
-        <button class="flex-1 bg-transparent border border-[#00d4ff] text-[#00d4ff] py-3 rounded-lg font-semibold">View Profile</button>
+        <button onclick="openDetails(${p.id})" class="flex-1 bg-transparent border border-[#00d4ff] text-[#00d4ff] py-3 rounded-lg font-semibold">View Profile</button>
         <button onclick="openDirections(${p.lat}, ${p.lng})" title="Get directions" class="flex items-center justify-center gap-2 bg-[#00d4ff] text-[#0f0f0f] px-4 py-3 rounded-lg font-semibold">
           <svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg">
             <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
@@ -325,6 +337,64 @@ document.getElementById('near-me-btn').addEventListener('click', () => {
     }
   );
 });
+
+// ---------- DETAILS MODAL ----------
+function openDetails(id) {
+  const p = PROVIDERS.find(x => x.id === id);
+  if (!p) return;
+
+  const distance = (state.userCoords)
+    ? `<p class="text-[#00d4ff] text-sm mb-4">${haversineKm(state.userCoords.lat, state.userCoords.lng, p.lat, p.lng).toFixed(1)} km from your location</p>`
+    : '';
+
+  document.getElementById('details-body').innerHTML = `
+    <div class="flex items-center gap-3 mb-4">
+      <div class="bg-[#00d4ff] bg-opacity-10 p-3 rounded-lg">
+        <svg fill="none" height="24" stroke="#00d4ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">${ICONS[p.icon] || ICONS.wrench}</svg>
+      </div>
+      <div>
+        <h3 class="text-xl font-bold">${p.name}</h3>
+        <span class="text-[#a3a3a3] text-sm">${p.category}</span>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-1 mb-4">
+      ${starsMarkup(p.rating)}
+      <span class="text-[#a3a3a3] text-sm ml-2">(${p.reviews.toLocaleString()} reviews)</span>
+    </div>
+
+    <p class="text-[#a3a3a3] text-sm mb-4">${p.description}</p>
+    ${distance}
+
+    <div class="border-t border-[#2d2d2d] pt-4 space-y-3">
+      <div class="flex items-start gap-3 text-sm">
+        <svg class="flex-shrink-0 mt-0.5" fill="none" height="16" stroke="#a3a3a3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
+          <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle>
+        </svg>
+        <span class="text-[#a3a3a3]">${p.address}</span>
+      </div>
+      <div class="flex items-center gap-3 text-sm">
+        <svg class="flex-shrink-0" fill="none" height="16" stroke="#a3a3a3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+        </svg>
+        ${p.phone
+          ? `<a href="tel:${p.phone.replace(/\s/g, '')}" class="text-[#00d4ff]">${p.phone}</a>`
+          : `<span class="text-[#a3a3a3]">Phone not listed — see Google Maps</span>`}
+      </div>
+    </div>
+
+    <div class="flex gap-3 mt-6">
+      ${p.phone ? `<a href="tel:${p.phone.replace(/\s/g, '')}" class="flex-1 text-center bg-transparent border border-[#00d4ff] text-[#00d4ff] py-3 rounded-lg font-semibold">Call</a>` : ''}
+      <button onclick="openDirections(${p.lat}, ${p.lng})" class="flex-1 bg-[#00d4ff] text-[#0f0f0f] py-3 rounded-lg font-semibold">Get Directions</button>
+    </div>
+  `;
+
+  document.getElementById('details-modal').classList.remove('hidden');
+}
+
+function closeDetails() {
+  document.getElementById('details-modal').classList.add('hidden');
+}
 
 // ---------- INIT ----------
 renderChips();

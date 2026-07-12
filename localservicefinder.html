@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta content="width=device-width, initial-scale=1.0" name="viewport" />
+<title>ServiceHub - Find Local Service Providers Across India</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect" />
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+<style>
+  body { font-family: 'Inter', sans-serif; }
+  .chip { cursor: pointer; transition: all .15s ease; }
+  .chip.active { background:#00d4ff; color:#0f0f0f; }
+</style>
+</head>
+<body class="bg-[#0f0f0f] text-white">
+
+<!-- Navigation -->
+<nav class="bg-[#1e1e1e] border-b border-[#2d2d2d] sticky top-0 z-50">
+  <div class="max-w-[1280px] mx-auto px-6 h-[72px] flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <div class="bg-[#00d4ff] bg-opacity-10 p-3 rounded-lg">
+        <svg fill="none" height="24" stroke="#00d4ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+        </svg>
+      </div>
+      <span class="text-xl font-bold">ServiceHub</span>
+    </div>
+    <div class="hidden md:flex items-center gap-8">
+      <a class="text-[#a3a3a3]" href="#">Browse Services</a>
+      <a class="text-[#a3a3a3]" href="#">How It Works</a>
+      <a class="text-[#a3a3a3]" href="#">For Providers</a>
+      <button class="bg-[#00d4ff] text-[#0f0f0f] px-6 py-3 rounded-lg font-semibold">Sign In</button>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero + Search -->
+<section class="py-20 px-6" style="background: radial-gradient(circle at center, rgba(0, 212, 255, 0.05), transparent 70%);">
+  <div class="max-w-[1280px] mx-auto text-center">
+    <h1 class="text-5xl font-bold mb-4">Find Trusted Local Service Providers</h1>
+    <p class="text-[#a3a3a3] text-lg mb-10 max-w-2xl mx-auto">
+      Connect with verified professionals across India. From plumbers to electricians, find the right expert for any job.
+    </p>
+
+    <div class="flex flex-col md:flex-row gap-4 justify-center items-center max-w-4xl mx-auto mb-6">
+      <div class="relative w-full md:flex-1">
+        <svg class="absolute left-6 top-1/2 transform -translate-y-1/2" fill="none" height="20" stroke="#a3a3a3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path>
+        </svg>
+        <input id="search-query" class="w-full bg-[#1e1e1e] border-2 border-[#2d2d2d] rounded-3xl py-4 px-14 text-white placeholder-[#a3a3a3]" placeholder="Search for services (e.g., plumber, electrician)" type="text" />
+      </div>
+      <div class="relative w-full md:w-64">
+        <svg class="absolute left-6 top-1/2 transform -translate-y-1/2" fill="none" height="20" stroke="#a3a3a3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg">
+          <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle>
+        </svg>
+        <input id="search-location" class="w-full bg-[#1e1e1e] border-2 border-[#2d2d2d] rounded-3xl py-4 px-14 text-white placeholder-[#a3a3a3]" placeholder="Enter city or state" type="text" />
+      </div>
+      <button id="near-me-btn" type="button" class="flex items-center gap-2 bg-transparent border-2 border-[#00d4ff] text-[#00d4ff] px-6 py-4 rounded-3xl font-semibold w-full md:w-auto whitespace-nowrap">
+        <svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="1"></circle><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm0 4v2m0 12v2m10-8h-2M4 12H2"></path>
+        </svg>
+        Near Me
+      </button>
+    </div>
+
+    <!-- Category quick filters -->
+    <div id="category-chips" class="flex flex-wrap gap-2 justify-center"></div>
+
+    <p id="gps-status" class="text-sm text-[#a3a3a3] mt-4 hidden"></p>
+  </div>
+</section>
+
+<!-- Providers grid -->
+<section class="py-12 px-6">
+  <div class="max-w-[1280px] mx-auto">
+    <div class="flex justify-between items-center mb-8">
+      <h2 class="text-3xl font-semibold">Top Service Providers</h2>
+      <span id="provider-count" class="text-[#a3a3a3]"></span>
+    </div>
+    <div id="providers-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    <div id="empty-state" class="hidden mt-12 text-center text-[#a3a3a3]">
+      No providers matched your search. Try a different service, location, or clear the GPS sort.
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-[#1e1e1e] border-t border-[#2d2d2d] mt-20 py-12 px-6">
+  <div class="max-w-[1280px] mx-auto">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+      <div>
+        <div class="flex items-center gap-2 mb-4">
+          <div class="bg-[#00d4ff] bg-opacity-10 p-3 rounded-lg">
+            <svg fill="none" height="24" stroke="#00d4ff" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+            </svg>
+          </div>
+          <span class="text-xl font-bold">ServiceHub</span>
+        </div>
+        <p class="text-[#a3a3a3] text-sm">Connecting you with trusted local service providers across India.</p>
+      </div>
+      <div>
+        <h4 class="font-semibold mb-4">Services</h4>
+        <ul class="space-y-2 text-[#a3a3a3] text-sm"><li>Plumbing</li><li>Electrical</li><li>HVAC</li><li>Carpentry</li></ul>
+      </div>
+      <div>
+        <h4 class="font-semibold mb-4">Company</h4>
+        <ul class="space-y-2 text-[#a3a3a3] text-sm"><li>About Us</li><li>Careers</li><li>Contact</li><li>Blog</li></ul>
+      </div>
+      <div>
+        <h4 class="font-semibold mb-4">Support</h4>
+        <ul class="space-y-2 text-[#a3a3a3] text-sm"><li>Help Center</li><li>Safety Guidelines</li><li>Terms of Service</li><li>Privacy Policy</li></ul>
+      </div>
+    </div>
+    <div class="border-t border-[#2d2d2d] pt-8 text-center text-[#a3a3a3] text-sm">
+      <p>© 2026 ServiceHub. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ---------- DATA (this is your "database" — just a JS array, no server) ----------
+// Real, verified Bengaluru businesses — actual coordinates and phone
+// numbers, all within one city so GPS distance-sorting is meaningful.
+// Descriptions written independently, not copied from review text.
+const PROVIDERS = [
+  { id:1, name:"Rupachandra Plumbing Services", category:"Plumbing", description:"Home plumbing repairs, fittings, and bathroom tile work.", rating:5, reviews:454, location:"BTM Layout 2nd Stage, Bengaluru", phone:"+91 99807 98772", icon:"wrench", lat:12.9084444, lng:77.613169 },
+  { id:2, name:"DK Plumbing Service", category:"Plumbing", description:"Round-the-clock plumbing service for leaks, fittings, and repairs.", rating:5, reviews:384, location:"Banashankari, Bengaluru", phone:"+91 81441 30198", icon:"wrench", lat:12.9345241, lng:77.5556016 },
+  { id:3, name:"CTG Plumbing & Sanitary Works", category:"Plumbing", description:"Sanitary fittings, shower and faucet installation, tap repair.", rating:5, reviews:278, location:"Nagavara, Bengaluru", phone:"+91 98458 50597", icon:"wrench", lat:13.0443359, lng:77.6248736 },
+  { id:4, name:"Planet Electricals", category:"Electrical", description:"Electrician network covering wiring, repairs, and installations.", rating:5, reviews:1058, location:"J. P. Nagar, Bengaluru", phone:"+91 91108 19125", icon:"bolt", lat:12.9005929, lng:77.5884972 },
+  { id:5, name:"Krupa Electrician", category:"Electrical", description:"Home electrical repairs, inverter and geyser servicing.", rating:5, reviews:638, location:"Electronic City, Bengaluru", phone:"+91 95059 62723", icon:"bolt", lat:12.8580871, lng:77.675405 },
+  { id:6, name:"Kannika Electricals", category:"Electrical", description:"Switch, wiring, and socket repair with quick response times.", rating:5, reviews:74, location:"Sampangi Rama Nagara, Bengaluru", phone:"+91 76768 62585", icon:"bolt", lat:12.9630501, lng:77.5905513 },
+  { id:7, name:"Carpenter & Woodwork Services", category:"Carpentry", description:"Custom modular kitchens, wardrobes, and furniture woodwork.", rating:5, reviews:17, location:"C V Raman Nagar, Bengaluru", phone:"+91 90056 19995", icon:"layout", lat:12.9894455, lng:77.6657474 },
+  { id:8, name:"MS Carpentry Works", category:"Carpentry", description:"Interior decor and carpentry work with in-house finishing.", rating:5, reviews:29, location:"Nagarbhavi, Bengaluru", phone:null, icon:"layout", lat:12.9756006, lng:77.5263211 },
+  { id:9, name:"RK Cooling System", category:"HVAC", description:"AC repair, installation, and annual maintenance contracts.", rating:5, reviews:15, location:"J. P. Nagar, Bengaluru", phone:"+91 63625 99455", icon:"snowflake", lat:12.9030392, lng:77.5688055 },
+  { id:10, name:"Windsor Cooling System", category:"HVAC", description:"AC repair, gas refilling, cleaning, and new installations.", rating:5, reviews:44, location:"RT Nagar, Bengaluru", phone:"+91 78990 99094", icon:"snowflake", lat:13.0332629, lng:77.6015069 },
+  { id:11, name:"AapkaPainter Bengaluru", category:"Painting", description:"Home painting with color consultation and project supervision.", rating:5, reviews:4107, location:"Bellandur, Bengaluru", phone:"+91 80887 77173", icon:"home", lat:12.9239742, lng:77.6675882 },
+  { id:12, name:"ThePaintDecorators", category:"Painting", description:"Interior and exterior painting with catalog-based color options.", rating:5, reviews:791, location:"Jayanagar, Bengaluru", phone:"+91 89519 02694", icon:"home", lat:12.927188, lng:77.592862 },
+  { id:13, name:"Clean Fanatic", category:"Cleaning", description:"Deep home cleaning covering kitchens, bathrooms, and every surface.", rating:5, reviews:18204, location:"HSR Layout, Bengaluru", phone:"+91 87222 72777", icon:"target", lat:12.9099143, lng:77.6624614 },
+  { id:14, name:"Homecare Solutions", category:"Cleaning", description:"Home, office, and kitchen deep-cleaning service.", rating:5, reviews:2610, location:"Domlur, Bengaluru", phone:"+91 91483 34580", icon:"target", lat:12.9600295, lng:77.6384007 },
+  { id:15, name:"BTM Key Makers and Lock Repair", category:"Locksmith", description:"Emergency key making and lock repair, fast response.", rating:5, reviews:240, location:"BTM 1st Stage, Bengaluru", phone:"+91 98962 00480", icon:"lock", lat:12.92294, lng:77.614208 },
+  { id:16, name:"KEY MAKERS", category:"Locksmith", description:"Key duplication and lock-out assistance for homes and vehicles.", rating:5, reviews:478, location:"Koramangala, Bengaluru", phone:"+91 95911 42718", icon:"lock", lat:12.9219603, lng:77.6215917 },
+  { id:17, name:"Bangalore Waterproofing Co", category:"Roofing", description:"Terrace and roof waterproofing solutions for homes.", rating:5, reviews:114, location:"Mangammanapalya, Bengaluru", phone:"+91 74834 26093", icon:"search", lat:12.905385, lng:77.6339412 },
+  { id:18, name:"AHAD Waterproofing", category:"Roofing", description:"Terrace waterproofing with fiber-mesh reinforcement techniques.", rating:5, reviews:143, location:"BTM 1st Stage, Bengaluru", phone:"+91 98804 60484", icon:"search", lat:12.9215393, lng:77.6091679 },
+  { id:19, name:"Integrated Pest Control Pvt. Ltd.", category:"Pest Control", description:"Residential pest control and disinfection service.", rating:5, reviews:1263, location:"J. P. Nagar, Bengaluru", phone:"+91 74110 32320", icon:"plus", lat:12.9015401, lng:77.5823745 },
+  { id:20, name:"Home Appliance Repair Bengaluru", category:"Appliance Repair", description:"Washing machine, fridge, and appliance repair at home.", rating:5, reviews:54, location:"Jayanagar, Bengaluru", phone:"+91 90000 06893", icon:"target", lat:12.9395294, lng:77.5692521 },
+];
+
+const ICONS = {
+  wrench: '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>',
+  bolt: '<path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"></path>',
+  layout: '<rect height="18" rx="2" width="18" x="3" y="3"></rect><path d="M3 9h18"></path><path d="M9 21V9"></path>',
+  snowflake: '<path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"></path><path d="M17 18h1"></path><path d="M12 18h1"></path><path d="M7 18h1"></path>',
+  home: '<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline>',
+  target: '<circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle>',
+  plus: '<path d="M12 5v14"></path><path d="M5 12h14"></path>',
+  lock: '<rect height="11" rx="2" ry="2" width="18" x="3" y="11"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path>',
+  search: '<circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path>',
+};
+
+// ---------- STATE ----------
+let state = { query: "", location: "", category: "All", userCoords: null };
+
+// ---------- HELPERS ----------
+function haversineKm(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2)**2;
+  return R * 2 * Math.asin(Math.sqrt(a));
+}
+
+function starsMarkup(rating) {
+  let out = '';
+  for (let i = 1; i <= 5; i++) {
+    const color = i <= rating ? '#fbbf24' : '#404040';
+    out += `<svg fill="${color}" height="18" stroke="${color}" stroke-width="2" viewBox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
+  }
+  return out;
+}
+
+function cardMarkup(p) {
+  const iconPath = ICONS[p.icon] || ICONS.wrench;
+  const distanceTag = (state.userCoords && p._distance != null)
+    ? `<span class="bg-[#00d4ff] bg-opacity-10 text-[#00d4ff] px-3 py-1 rounded-full text-xs font-semibold">${p._distance.toFixed(1)} km away</span>`
+    : `<span class="bg-[#7c3aed] bg-opacity-20 text-[#c4b5fd] px-3 py-1 rounded-full text-xs font-semibold">Verified</span>`;
+  return `
+    <div class="bg-gradient-to-b from-[#1e1e1e] to-[#252525] border border-[#2d2d2d] rounded-xl p-6 shadow-[0_4px_16px_rgba(0,0,0,0.4)]">
+      <div class="flex items-start justify-between mb-4">
+        <div class="bg-[#00d4ff] bg-opacity-10 p-3 rounded-lg">
+          <svg fill="none" height="24" stroke="#00d4ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">${iconPath}</svg>
+        </div>
+        ${distanceTag}
+      </div>
+      <h3 class="text-xl font-semibold mb-2">${p.name}</h3>
+      <p class="text-[#a3a3a3] text-sm mb-4">${p.description}</p>
+      <div class="flex items-center gap-1 mb-4">
+        ${starsMarkup(p.rating)}
+        <span class="text-[#a3a3a3] text-sm ml-2">(${p.reviews} reviews)</span>
+      </div>
+      <button onclick="openDirections(${p.lat}, ${p.lng})" class="flex items-center gap-2 text-sm text-[#a3a3a3] mb-2 hover:text-[#00d4ff] transition-colors text-left">
+        <svg fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
+          <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle>
+        </svg>
+        <span class="underline decoration-dotted">${p.location}</span>
+      </button>
+      <div class="flex items-center gap-2 text-sm text-[#a3a3a3] mb-6">
+        <svg fill="none" height="16" stroke="#a3a3a3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+        </svg>
+        <span>${p.phone || 'Phone not listed — see Google Maps'}</span>
+      </div>
+      <div class="flex gap-3">
+        <button class="flex-1 bg-transparent border border-[#00d4ff] text-[#00d4ff] py-3 rounded-lg font-semibold">View Profile</button>
+        <button onclick="openDirections(${p.lat}, ${p.lng})" title="Get directions" class="flex items-center justify-center gap-2 bg-[#00d4ff] text-[#0f0f0f] px-4 py-3 rounded-lg font-semibold">
+          <svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
+          </svg>
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+// Opens Google Maps, routing from the user's current GPS position (if we
+// already have it from "Near Me") straight to the provider's coordinates.
+// Falls back to just showing the destination pin if we don't have GPS yet.
+function openDirections(destLat, destLng) {
+  const destination = `${destLat},${destLng}`;
+  if (state.userCoords) {
+    const origin = `${state.userCoords.lat},${state.userCoords.lng}`;
+    window.open(`https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=driving`, '_blank');
+  } else {
+    window.open(`https://www.google.com/maps/search/?api=1&query=${destination}`, '_blank');
+  }
+}
+
+function renderChips() {
+  const cats = ["All", ...new Set(PROVIDERS.map(p => p.category))];
+  const chipsEl = document.getElementById('category-chips');
+  chipsEl.innerHTML = cats.map(c =>
+    `<button data-cat="${c}" class="chip ${c === state.category ? 'active' : ''} border border-[#2d2d2d] text-sm px-4 py-2 rounded-full text-[#a3a3a3]">${c}</button>`
+  ).join('');
+  chipsEl.querySelectorAll('.chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.category = btn.dataset.cat;
+      renderChips();
+      applyFilters();
+    });
+  });
+}
+
+function applyFilters() {
+  let results = PROVIDERS.slice();
+
+  if (state.category !== "All") {
+    results = results.filter(p => p.category === state.category);
+  }
+
+  if (state.query.trim()) {
+    const q = state.query.trim().toLowerCase();
+    results = results.filter(p =>
+      p.name.toLowerCase().includes(q) ||
+      p.category.toLowerCase().includes(q) ||
+      p.description.toLowerCase().includes(q)
+    );
+  }
+
+  if (state.location.trim()) {
+    const loc = state.location.trim().toLowerCase();
+    results = results.filter(p => p.location.toLowerCase().includes(loc));
+  }
+
+  if (state.userCoords) {
+    results.forEach(p => {
+      p._distance = haversineKm(state.userCoords.lat, state.userCoords.lng, p.lat, p.lng);
+    });
+    results.sort((a, b) => a._distance - b._distance);
+  }
+
+  renderResults(results);
+}
+
+function renderResults(results) {
+  const grid = document.getElementById('providers-grid');
+  const countLabel = document.getElementById('provider-count');
+  const emptyState = document.getElementById('empty-state');
+
+  grid.innerHTML = results.map(cardMarkup).join('');
+  countLabel.textContent = `${results.length} provider${results.length === 1 ? '' : 's'} available`;
+  emptyState.classList.toggle('hidden', results.length > 0);
+}
+
+// ---------- EVENTS ----------
+document.getElementById('search-query').addEventListener('input', (e) => {
+  state.query = e.target.value;
+  applyFilters();
+});
+
+document.getElementById('search-location').addEventListener('input', (e) => {
+  state.location = e.target.value;
+  applyFilters();
+});
+
+document.getElementById('near-me-btn').addEventListener('click', () => {
+  const statusEl = document.getElementById('gps-status');
+  statusEl.classList.remove('hidden');
+
+  if (!navigator.geolocation) {
+    statusEl.textContent = "GPS isn't available in this browser.";
+    return;
+  }
+
+  statusEl.textContent = "Getting your location…";
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      state.userCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      statusEl.textContent = "Showing providers sorted by distance from you.";
+      applyFilters();
+    },
+    (err) => {
+      statusEl.textContent = "Couldn't get your location — please allow location access and try again.";
+    }
+  );
+});
+
+// ---------- INIT ----------
+renderChips();
+applyFilters();
+</script>
+</body>
+</html>

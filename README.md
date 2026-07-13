@@ -1,1 +1,659 @@
 # local_service_finder
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta content="width=device-width, initial-scale=1.0" name="viewport" />
+<title>ServiceHub - Find Local Service Providers Across India</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect" />
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+<style>
+  body { font-family: 'Inter', sans-serif; }
+  .chip { cursor: pointer; transition: all .15s ease; }
+  .chip.active { background:#00d4ff; color:#0f0f0f; }
+</style>
+</head>
+<body class="bg-[#0f0f0f] text-white">
+
+<!-- Navigation -->
+<nav class="bg-[#1e1e1e] border-b border-[#2d2d2d] sticky top-0 z-50">
+  <div class="max-w-[1280px] mx-auto px-6 h-[72px] flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <div class="bg-[#00d4ff] bg-opacity-10 p-3 rounded-lg">
+        <svg fill="none" height="24" stroke="#00d4ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+        </svg>
+      </div>
+      <span class="text-xl font-bold">ServiceHub</span>
+    </div>
+    <div class="hidden md:flex items-center gap-4">
+      <a class="text-[#a3a3a3]" href="#">Browse Services</a>
+      <a class="text-[#a3a3a3]" href="#">How It Works</a>
+      <a class="text-[#a3a3a3]" href="#">For Providers</a>
+      <div id="auth-area"></div>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero + Search -->
+<section class="py-20 px-6" style="background: radial-gradient(circle at center, rgba(0, 212, 255, 0.05), transparent 70%);">
+  <div class="max-w-[1280px] mx-auto text-center">
+    <h1 class="text-5xl font-bold mb-4">Find Trusted Local Service Providers</h1>
+    <p class="text-[#a3a3a3] text-lg mb-10 max-w-2xl mx-auto">
+      Connect with verified professionals across India. From plumbers to electricians, find the right expert for any job.
+    </p>
+
+    <div class="flex flex-col md:flex-row gap-4 justify-center items-center max-w-4xl mx-auto mb-6">
+      <div class="relative w-full md:flex-1">
+        <svg class="absolute left-6 top-1/2 transform -translate-y-1/2" fill="none" height="20" stroke="#a3a3a3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path>
+        </svg>
+        <input id="search-query" class="w-full bg-[#1e1e1e] border-2 border-[#2d2d2d] rounded-3xl py-4 px-14 text-white placeholder-[#a3a3a3]" placeholder="Search for services (e.g., plumber, electrician)" type="text" />
+      </div>
+      <div class="relative w-full md:w-64">
+        <svg class="absolute left-6 top-1/2 transform -translate-y-1/2" fill="none" height="20" stroke="#a3a3a3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg">
+          <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle>
+        </svg>
+        <input id="search-location" class="w-full bg-[#1e1e1e] border-2 border-[#2d2d2d] rounded-3xl py-4 px-14 text-white placeholder-[#a3a3a3]" placeholder="Enter city or state" type="text" />
+      </div>
+      <button id="near-me-btn" type="button" class="flex items-center gap-2 bg-transparent border-2 border-[#00d4ff] text-[#00d4ff] px-6 py-4 rounded-3xl font-semibold w-full md:w-auto whitespace-nowrap">
+        <svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="1"></circle><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm0 4v2m0 12v2m10-8h-2M4 12H2"></path>
+        </svg>
+        Near Me
+      </button>
+    </div>
+
+    <!-- Category quick filters -->
+    <div id="category-chips" class="flex flex-wrap gap-2 justify-center"></div>
+
+    <p id="gps-status" class="text-sm text-[#a3a3a3] mt-4 hidden"></p>
+  </div>
+</section>
+
+<!-- Providers grid -->
+<section class="py-12 px-6">
+  <div class="max-w-[1280px] mx-auto">
+    <div class="flex justify-between items-center mb-8">
+      <h2 class="text-3xl font-semibold">Top Service Providers</h2>
+      <span id="provider-count" class="text-[#a3a3a3]"></span>
+    </div>
+    <div id="providers-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    <div id="empty-state" class="hidden mt-12 text-center text-[#a3a3a3]">
+      No providers matched your search. Try a different service, location, or clear the GPS sort.
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-[#1e1e1e] border-t border-[#2d2d2d] mt-20 py-12 px-6">
+  <div class="max-w-[1280px] mx-auto">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+      <div>
+        <div class="flex items-center gap-2 mb-4">
+          <div class="bg-[#00d4ff] bg-opacity-10 p-3 rounded-lg">
+            <svg fill="none" height="24" stroke="#00d4ff" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+            </svg>
+          </div>
+          <span class="text-xl font-bold">ServiceHub</span>
+        </div>
+        <p class="text-[#a3a3a3] text-sm">Connecting you with trusted local service providers across India.</p>
+      </div>
+      <div>
+        <h4 class="font-semibold mb-4">Services</h4>
+        <ul class="space-y-2 text-[#a3a3a3] text-sm"><li>Plumbing</li><li>Electrical</li><li>HVAC</li><li>Carpentry</li></ul>
+      </div>
+      <div>
+        <h4 class="font-semibold mb-4">Company</h4>
+        <ul class="space-y-2 text-[#a3a3a3] text-sm"><li>About Us</li><li>Careers</li><li>Contact</li><li>Blog</li></ul>
+      </div>
+      <div>
+        <h4 class="font-semibold mb-4">Support</h4>
+        <ul class="space-y-2 text-[#a3a3a3] text-sm"><li>Help Center</li><li>Safety Guidelines</li><li>Terms of Service</li><li>Privacy Policy</li></ul>
+      </div>
+    </div>
+    <div class="border-t border-[#2d2d2d] pt-8 text-center text-[#a3a3a3] text-sm">
+      <p>© 2026 ServiceHub. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+<!-- Sign-in: choose role -->
+<div id="signin-modal" class="hidden fixed inset-0 z-[100] bg-black bg-opacity-70 flex items-center justify-center p-4" onclick="if(event.target===this) closeSignIn()">
+  <div class="bg-[#1e1e1e] border border-[#2d2d2d] rounded-2xl max-w-md w-full p-6 relative">
+    <button onclick="closeSignIn()" class="absolute top-4 right-4 text-[#a3a3a3] hover:text-white">
+      <svg fill="none" height="22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="22" xmlns="http://www.w3.org/2000/svg">
+        <path d="M18 6 6 18"></path><path d="m6 6 12 12"></path>
+      </svg>
+    </button>
+    <h3 class="text-xl font-bold mb-1">Sign In to ServiceHub</h3>
+    <p class="text-[#a3a3a3] text-sm mb-6">Choose how you want to use the app.</p>
+    <div class="space-y-3">
+      <button onclick="openSignInForm('customer')" class="w-full text-left bg-[#252525] hover:bg-[#2d2d2d] border border-[#2d2d2d] rounded-xl p-4 flex items-center gap-4 transition-colors">
+        <div class="bg-[#00d4ff] bg-opacity-10 p-3 rounded-lg">
+          <svg fill="none" height="22" stroke="#00d4ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="22" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 21a8 8 0 0 0-16 0"></path><circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </div>
+        <div>
+          <p class="font-semibold">Sign in as Customer</p>
+          <p class="text-[#a3a3a3] text-xs">Search, browse, and book local services</p>
+        </div>
+      </button>
+      <button onclick="openSignInForm('worker')" class="w-full text-left bg-[#252525] hover:bg-[#2d2d2d] border border-[#2d2d2d] rounded-xl p-4 flex items-center gap-4 transition-colors">
+        <div class="bg-[#7c3aed] bg-opacity-10 p-3 rounded-lg">
+          <svg fill="none" height="22" stroke="#c4b5fd" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="22" xmlns="http://www.w3.org/2000/svg">
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+          </svg>
+        </div>
+        <div>
+          <p class="font-semibold">Sign in as Worker</p>
+          <p class="text-[#a3a3a3] text-xs">List your service and get discovered nearby</p>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Sign-in: details form (shared for both roles) -->
+<div id="signin-form-modal" class="hidden fixed inset-0 z-[100] bg-black bg-opacity-70 flex items-center justify-center p-4" onclick="if(event.target===this) closeSignInForm()">
+  <div class="bg-[#1e1e1e] border border-[#2d2d2d] rounded-2xl max-w-md w-full p-6 relative">
+    <button onclick="closeSignInForm()" class="absolute top-4 right-4 text-[#a3a3a3] hover:text-white">
+      <svg fill="none" height="22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="22" xmlns="http://www.w3.org/2000/svg">
+        <path d="M18 6 6 18"></path><path d="m6 6 12 12"></path>
+      </svg>
+    </button>
+    <h3 id="signin-form-title" class="text-xl font-bold mb-6"></h3>
+    <form id="signin-form" onsubmit="submitSignIn(event)" class="space-y-4">
+      <div>
+        <label class="text-sm text-[#a3a3a3] block mb-1">Full name</label>
+        <input id="signin-name" required class="w-full bg-[#252525] border border-[#2d2d2d] rounded-lg py-3 px-4 text-white" type="text" placeholder="e.g., Ramesh Kumar" />
+      </div>
+      <div>
+        <label class="text-sm text-[#a3a3a3] block mb-1">Phone number</label>
+        <input id="signin-phone" required class="w-full bg-[#252525] border border-[#2d2d2d] rounded-lg py-3 px-4 text-white" type="tel" placeholder="+91 90000 00000" />
+      </div>
+      <button type="submit" class="w-full bg-[#00d4ff] text-[#0f0f0f] py-3 rounded-lg font-semibold mt-2">Continue</button>
+    </form>
+  </div>
+</div>
+
+<!-- Worker: add my service listing -->
+<div id="add-listing-modal" class="hidden fixed inset-0 z-[100] bg-black bg-opacity-70 flex items-center justify-center p-4" onclick="if(event.target===this) closeAddListing()">
+  <div class="bg-[#1e1e1e] border border-[#2d2d2d] rounded-2xl max-w-md w-full p-6 relative max-h-[85vh] overflow-y-auto">
+    <button onclick="closeAddListing()" class="absolute top-4 right-4 text-[#a3a3a3] hover:text-white">
+      <svg fill="none" height="22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="22" xmlns="http://www.w3.org/2000/svg">
+        <path d="M18 6 6 18"></path><path d="m6 6 12 12"></path>
+      </svg>
+    </button>
+    <h3 class="text-xl font-bold mb-1">List Your Service</h3>
+    <p class="text-[#a3a3a3] text-sm mb-6">This adds a real card to the grid below, using your live location.</p>
+    <form id="add-listing-form" onsubmit="submitAddListing(event)" class="space-y-4">
+      <div>
+        <label class="text-sm text-[#a3a3a3] block mb-1">Business / service name</label>
+        <input id="listing-name" required class="w-full bg-[#252525] border border-[#2d2d2d] rounded-lg py-3 px-4 text-white" type="text" placeholder="e.g., Ramesh Plumbing Works" />
+      </div>
+      <div>
+        <label class="text-sm text-[#a3a3a3] block mb-1">Category</label>
+        <select id="listing-category" required class="w-full bg-[#252525] border border-[#2d2d2d] rounded-lg py-3 px-4 text-white">
+          <option value="Plumbing">Plumbing</option>
+          <option value="Electrical">Electrical</option>
+          <option value="Carpentry">Carpentry</option>
+          <option value="HVAC">HVAC</option>
+          <option value="Painting">Painting</option>
+          <option value="Cleaning">Cleaning</option>
+          <option value="Locksmith">Locksmith</option>
+          <option value="Roofing">Roofing</option>
+          <option value="Pest Control">Pest Control</option>
+          <option value="Appliance Repair">Appliance Repair</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-sm text-[#a3a3a3] block mb-1">Short description</label>
+        <input id="listing-description" required class="w-full bg-[#252525] border border-[#2d2d2d] rounded-lg py-3 px-4 text-white" type="text" placeholder="One line about what you offer" />
+      </div>
+      <div>
+        <label class="text-sm text-[#a3a3a3] block mb-1">Area / locality</label>
+        <input id="listing-location" required class="w-full bg-[#252525] border border-[#2d2d2d] rounded-lg py-3 px-4 text-white" type="text" placeholder="e.g., Whitefield, Bengaluru" />
+      </div>
+      <div>
+        <label class="text-sm text-[#a3a3a3] block mb-1">Full address</label>
+        <input id="listing-address" required class="w-full bg-[#252525] border border-[#2d2d2d] rounded-lg py-3 px-4 text-white" type="text" placeholder="Shop / house no., street, area, city, PIN" />
+      </div>
+      <div>
+        <button type="button" onclick="useMyLocationForListing()" class="w-full flex items-center justify-center gap-2 bg-transparent border border-[#00d4ff] text-[#00d4ff] py-3 rounded-lg font-semibold text-sm">
+          Use My Current GPS Location
+        </button>
+        <p id="listing-coords-status" class="text-xs text-[#666] mt-2"></p>
+      </div>
+      <button type="submit" class="w-full bg-[#00d4ff] text-[#0f0f0f] py-3 rounded-lg font-semibold mt-2">Publish Listing</button>
+    </form>
+  </div>
+</div>
+
+<!-- Details modal -->
+<div id="details-modal" class="hidden fixed inset-0 z-[100] bg-black bg-opacity-70 flex items-center justify-center p-4" onclick="if(event.target===this) closeDetails()">
+  <div class="bg-[#1e1e1e] border border-[#2d2d2d] rounded-2xl max-w-lg w-full p-6 relative max-h-[85vh] overflow-y-auto">
+    <button onclick="closeDetails()" class="absolute top-4 right-4 text-[#a3a3a3] hover:text-white">
+      <svg fill="none" height="22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="22" xmlns="http://www.w3.org/2000/svg">
+        <path d="M18 6 6 18"></path><path d="m6 6 12 12"></path>
+      </svg>
+    </button>
+    <div id="details-body"></div>
+  </div>
+</div>
+
+<script>
+// ---------- DATA (this is your "database" — just a JS array, no server) ----------
+// Real, verified Bengaluru businesses — actual coordinates and phone
+// numbers, all within one city so GPS distance-sorting is meaningful.
+// Descriptions written independently, not copied from review text.
+const PROVIDERS = [
+  { id:1, name:"Rupachandra Plumbing Services", category:"Plumbing", description:"Home plumbing repairs, fittings, and bathroom tile work.", rating:5, reviews:454, location:"BTM Layout 2nd Stage, Bengaluru", address:"2nd floor, 10th cross, 29th Main Rd, EWS Colony, BTM Layout 2nd Stage, Bengaluru, Karnataka 560076", phone:"+91 99807 98772", icon:"wrench", lat:12.9084444, lng:77.613169 },
+  { id:2, name:"DK Plumbing Service", category:"Plumbing", description:"Round-the-clock plumbing service for leaks, fittings, and repairs.", rating:5, reviews:384, location:"Banashankari, Bengaluru", address:"5 A 13th A cross, 4th Main Rd, near Yallamma Temple, Srinivasnagar, Banashankari, Bengaluru, Karnataka 560085", phone:"+91 81441 30198", icon:"wrench", lat:12.9345241, lng:77.5556016 },
+  { id:3, name:"CTG Plumbing & Sanitary Works", category:"Plumbing", description:"Sanitary fittings, shower and faucet installation, tap repair.", rating:5, reviews:278, location:"Nagavara, Bengaluru", address:"5, 3rd Cross, 1st Main, Shampur, Main Road, Arabic College Post, Gandhinagar, Nagavara, Bengaluru, Karnataka 560045", phone:"+91 98458 50597", icon:"wrench", lat:13.0443359, lng:77.6248736 },
+  { id:4, name:"Planet Electricals", category:"Electrical", description:"Electrician network covering wiring, repairs, and installations.", rating:5, reviews:1058, location:"J. P. Nagar, Bengaluru", address:"15, 1st Cross Rd, Vinayaka Nagar, Nanjundeswara Layout, J P Nagar Phase 5, Bengaluru, Karnataka 560078", phone:"+91 91108 19125", icon:"bolt", lat:12.9005929, lng:77.5884972 },
+  { id:5, name:"Krupa Electrician", category:"Electrical", description:"Home electrical repairs, inverter and geyser servicing.", rating:5, reviews:638, location:"Electronic City, Bengaluru", address:"House no. 24, Mouli Nilaya, Balaji Layout Rd, Silicon Town, Electronic City, Bengaluru, Karnataka 560100", phone:"+91 95059 62723", icon:"bolt", lat:12.8580871, lng:77.675405 },
+  { id:6, name:"Kannika Electricals", category:"Electrical", description:"Switch, wiring, and socket repair with quick response times.", rating:5, reviews:74, location:"Sampangi Rama Nagara, Bengaluru", address:"Sampangi Rama Nagara, Bengaluru, Karnataka 560027", phone:"+91 76768 62585", icon:"bolt", lat:12.9630501, lng:77.5905513 },
+  { id:7, name:"Carpenter & Woodwork Services", category:"Carpentry", description:"Custom modular kitchens, wardrobes, and furniture woodwork.", rating:5, reviews:17, location:"C V Raman Nagar, Bengaluru", address:"124, 14th A Cross, Yelamma Temple Road, Nagavarapalya, C V Raman Nagar, Bengaluru, Karnataka 560093", phone:"+91 90056 19995", icon:"layout", lat:12.9894455, lng:77.6657474 },
+  { id:8, name:"MS Carpentry Works", category:"Carpentry", description:"Interior decor and carpentry work with in-house finishing.", rating:5, reviews:29, location:"Nagarbhavi, Bengaluru", address:"28, 2nd cross, Government Electric Factory, 2nd Main Rd, Vijayanagar North, Nagarbhavi, Bengaluru, Karnataka 560026", phone:null, icon:"layout", lat:12.9756006, lng:77.5263211 },
+  { id:9, name:"RK Cooling System", category:"HVAC", description:"AC repair, installation, and annual maintenance contracts.", rating:5, reviews:15, location:"J. P. Nagar, Bengaluru", address:"12/1, 40 Feet Rd, Fayazabad, Kanka Nagar, J. P. Nagar, Bengaluru, Karnataka 560078", phone:"+91 63625 99455", icon:"snowflake", lat:12.9030392, lng:77.5688055 },
+  { id:10, name:"Windsor Cooling System", category:"HVAC", description:"AC repair, gas refilling, cleaning, and new installations.", rating:5, reviews:44, location:"RT Nagar, Bengaluru", address:"Seethappa Layout, Chamundi Nagar, RT Nagar, Bengaluru, Karnataka 560032", phone:"+91 78990 99094", icon:"snowflake", lat:13.0332629, lng:77.6015069 },
+  { id:11, name:"AapkaPainter Bengaluru", category:"Painting", description:"Home painting with color consultation and project supervision.", rating:5, reviews:4107, location:"Bellandur, Bengaluru", address:"Classic Converge, Sakti Statesman building, Marathahalli - Sarjapur Outer Ring Rd, Green Glen Layout, Bellandur, Bengaluru, Karnataka 560103", phone:"+91 80887 77173", icon:"home", lat:12.9239742, lng:77.6675882 },
+  { id:12, name:"ThePaintDecorators", category:"Painting", description:"Interior and exterior painting with catalog-based color options.", rating:5, reviews:791, location:"Jayanagar, Bengaluru", address:"25th Main Rd, BTB Area, 4th T Block East, Jayanagar, Bengaluru, Karnataka 560041", phone:"+91 89519 02694", icon:"home", lat:12.927188, lng:77.592862 },
+  { id:13, name:"Clean Fanatic", category:"Cleaning", description:"Deep home cleaning covering kitchens, bathrooms, and every surface.", rating:5, reviews:18204, location:"HSR Layout, Bengaluru", address:"9 Harlur Road, Ambalipura - Sarjapur Rd, PWD Quarters, 1st Sector, HSR Layout, Bengaluru, Karnataka 560102", phone:"+91 87222 72777", icon:"target", lat:12.9099143, lng:77.6624614 },
+  { id:14, name:"Homecare Solutions", category:"Cleaning", description:"Home, office, and kitchen deep-cleaning service.", rating:5, reviews:2610, location:"Domlur, Bengaluru", address:"Sri Vinayaka towers No. 292, 2nd floor, 7th Cross Rd, Domlur I Stage, Bengaluru, Karnataka 560071", phone:"+91 91483 34580", icon:"target", lat:12.9600295, lng:77.6384007 },
+  { id:15, name:"BTM Key Makers and Lock Repair", category:"Locksmith", description:"Emergency key making and lock repair, fast response.", rating:5, reviews:240, location:"BTM 1st Stage, Bengaluru", address:"1205, 20th Main, 1st Cross Rd, Old Madiwala, Maruti Nagar, BTM 1st Stage, Bengaluru, Karnataka 560029", phone:"+91 98962 00480", icon:"lock", lat:12.92294, lng:77.614208 },
+  { id:16, name:"KEY MAKERS", category:"Locksmith", description:"Key duplication and lock-out assistance for homes and vehicles.", rating:5, reviews:478, location:"Koramangala, Bengaluru", address:"75/1, Madiwala Rd, opp. canara bank, Old Madiwala, Madiwala 1st Stage, Koramangala, Bengaluru, Karnataka 560068", phone:"+91 95911 42718", icon:"lock", lat:12.9219603, lng:77.6215917 },
+  { id:17, name:"Bangalore Waterproofing Co", category:"Roofing", description:"Terrace and roof waterproofing solutions for homes.", rating:5, reviews:114, location:"Mangammanapalya, Bengaluru", address:"WJ4M+5HG, Mangammanapalya, Bengaluru, Karnataka 560068", phone:"+91 74834 26093", icon:"search", lat:12.905385, lng:77.6339412 },
+  { id:18, name:"AHAD Waterproofing", category:"Roofing", description:"Terrace waterproofing with fiber-mesh reinforcement techniques.", rating:5, reviews:143, location:"BTM 1st Stage, Bengaluru", address:"9, 2nd main, 3rd Cross Rd, opp. SLR's Mark Apartment, Madiwala New Extension, BTM 1st Stage, Bengaluru, Karnataka 560029", phone:"+91 98804 60484", icon:"search", lat:12.9215393, lng:77.6091679 },
+  { id:19, name:"Integrated Pest Control Pvt. Ltd.", category:"Pest Control", description:"Residential pest control and disinfection service.", rating:5, reviews:1263, location:"J. P. Nagar, Bengaluru", address:"24/1, 2nd main, Puttenahalli Rd, JP Nagar 6th Phase, Ashta Laxmi Layout, JP Nagar 7th Phase, Bengaluru, Karnataka 560078", phone:"+91 74110 32320", icon:"plus", lat:12.9015401, lng:77.5823745 },
+  { id:20, name:"Home Appliance Repair Bengaluru", category:"Appliance Repair", description:"Washing machine, fridge, and appliance repair at home.", rating:5, reviews:54, location:"Jayanagar, Bengaluru", address:"Shop no 28, 3rd Block, NR Colony, Jayanagar East, Bengaluru, Karnataka 560004", phone:"+91 90000 06893", icon:"target", lat:12.9395294, lng:77.5692521 },
+];
+
+const ICONS = {
+  wrench: '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>',
+  bolt: '<path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"></path>',
+  layout: '<rect height="18" rx="2" width="18" x="3" y="3"></rect><path d="M3 9h18"></path><path d="M9 21V9"></path>',
+  snowflake: '<path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"></path><path d="M17 18h1"></path><path d="M12 18h1"></path><path d="M7 18h1"></path>',
+  home: '<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline>',
+  target: '<circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle>',
+  plus: '<path d="M12 5v14"></path><path d="M5 12h14"></path>',
+  lock: '<rect height="11" rx="2" ry="2" width="18" x="3" y="11"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path>',
+  search: '<circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path>',
+};
+
+const ICON_BY_CATEGORY = {
+  "Plumbing": "wrench",
+  "Electrical": "bolt",
+  "Carpentry": "layout",
+  "HVAC": "snowflake",
+  "Painting": "home",
+  "Cleaning": "target",
+  "Locksmith": "lock",
+  "Roofing": "search",
+  "Pest Control": "plus",
+  "Appliance Repair": "target",
+};
+
+// ---------- STATE ----------
+let state = { query: "", location: "", category: "All", userCoords: null };
+
+// ---------- AUTH ----------
+let session = null; // { role: 'customer' | 'worker', name, phone }
+try {
+  const saved = localStorage.getItem('servicehub_session');
+  if (saved) session = JSON.parse(saved);
+} catch (e) { /* ignore corrupt storage */ }
+
+let pendingRole = null; // role chosen in the first sign-in modal, before the form
+
+function renderAuthArea() {
+  const el = document.getElementById('auth-area');
+  if (!session) {
+    el.innerHTML = `<button onclick="openSignIn()" class="bg-[#00d4ff] text-[#0f0f0f] px-6 py-3 rounded-lg font-semibold">Sign In</button>`;
+    return;
+  }
+
+  const roleLabel = session.role === 'worker' ? 'Worker' : 'Customer';
+  const roleColor = session.role === 'worker' ? 'text-[#c4b5fd]' : 'text-[#00d4ff]';
+  const listButton = session.role === 'worker'
+    ? `<button onclick="openAddListing()" class="bg-[#00d4ff] text-[#0f0f0f] px-4 py-2.5 rounded-lg font-semibold text-sm">+ List My Service</button>`
+    : '';
+
+  el.innerHTML = `
+    <div class="flex items-center gap-3">
+      ${listButton}
+      <div class="text-right leading-tight">
+        <p class="text-sm font-semibold">${session.name}</p>
+        <p class="text-xs ${roleColor}">${roleLabel}</p>
+      </div>
+      <button onclick="signOut()" title="Sign out" class="text-[#a3a3a3] hover:text-white">
+        <svg fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line>
+        </svg>
+      </button>
+    </div>
+  `;
+}
+
+function openSignIn() { document.getElementById('signin-modal').classList.remove('hidden'); }
+function closeSignIn() { document.getElementById('signin-modal').classList.add('hidden'); }
+
+function openSignInForm(role) {
+  pendingRole = role;
+  closeSignIn();
+  document.getElementById('signin-form-title').textContent =
+    role === 'worker' ? 'Sign in as Worker' : 'Sign in as Customer';
+  document.getElementById('signin-form').reset();
+  document.getElementById('signin-form-modal').classList.remove('hidden');
+}
+function closeSignInForm() { document.getElementById('signin-form-modal').classList.add('hidden'); }
+
+function submitSignIn(e) {
+  e.preventDefault();
+  const name = document.getElementById('signin-name').value.trim();
+  const phone = document.getElementById('signin-phone').value.trim();
+  if (!name || !phone) return;
+
+  session = { role: pendingRole, name, phone };
+  try { localStorage.setItem('servicehub_session', JSON.stringify(session)); } catch (e) {}
+
+  closeSignInForm();
+  renderAuthArea();
+}
+
+function signOut() {
+  session = null;
+  try { localStorage.removeItem('servicehub_session'); } catch (e) {}
+  renderAuthArea();
+}
+
+// ---------- WORKER: ADD LISTING ----------
+let listingCoords = null;
+
+function openAddListing() {
+  listingCoords = null;
+  document.getElementById('listing-coords-status').textContent = '';
+  document.getElementById('add-listing-form').reset();
+  document.getElementById('add-listing-modal').classList.remove('hidden');
+}
+function closeAddListing() { document.getElementById('add-listing-modal').classList.add('hidden'); }
+
+function useMyLocationForListing() {
+  const statusEl = document.getElementById('listing-coords-status');
+  if (!navigator.geolocation) {
+    statusEl.textContent = "GPS isn't available in this browser.";
+    return;
+  }
+  statusEl.textContent = "Getting your location…";
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      listingCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      statusEl.textContent = `Location captured (${listingCoords.lat.toFixed(4)}, ${listingCoords.lng.toFixed(4)}).`;
+    },
+    () => { statusEl.textContent = "Couldn't get your location — please allow location access."; }
+  );
+}
+
+function submitAddListing(e) {
+  e.preventDefault();
+  if (!listingCoords) {
+    document.getElementById('listing-coords-status').textContent =
+      "Please tap 'Use My Current GPS Location' first so customers can find you nearby.";
+    return;
+  }
+
+  const nextId = Math.max(...PROVIDERS.map(p => p.id)) + 1;
+  PROVIDERS.push({
+    id: nextId,
+    name: document.getElementById('listing-name').value.trim(),
+    category: document.getElementById('listing-category').value,
+    description: document.getElementById('listing-description').value.trim(),
+    rating: 0,
+    reviews: 0,
+    location: document.getElementById('listing-location').value.trim(),
+    address: document.getElementById('listing-address').value.trim(),
+    phone: session.phone,
+    icon: ICON_BY_CATEGORY[document.getElementById('listing-category').value] || 'wrench',
+    lat: listingCoords.lat,
+    lng: listingCoords.lng,
+  });
+
+  closeAddListing();
+  renderChips();
+  applyFilters();
+}
+
+
+// ---------- HELPERS ----------
+function haversineKm(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2)**2;
+  return R * 2 * Math.asin(Math.sqrt(a));
+}
+
+function starsMarkup(rating) {
+  let out = '';
+  for (let i = 1; i <= 5; i++) {
+    const color = i <= rating ? '#fbbf24' : '#404040';
+    out += `<svg fill="${color}" height="18" stroke="${color}" stroke-width="2" viewBox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
+  }
+  return out;
+}
+
+function cardMarkup(p) {
+  const iconPath = ICONS[p.icon] || ICONS.wrench;
+  const distanceTag = (state.userCoords && p._distance != null)
+    ? `<span class="bg-[#00d4ff] bg-opacity-10 text-[#00d4ff] px-3 py-1 rounded-full text-xs font-semibold">${p._distance.toFixed(1)} km away</span>`
+    : `<span class="bg-[#7c3aed] bg-opacity-20 text-[#c4b5fd] px-3 py-1 rounded-full text-xs font-semibold">Verified</span>`;
+  return `
+    <div class="bg-gradient-to-b from-[#1e1e1e] to-[#252525] border border-[#2d2d2d] rounded-xl p-6 shadow-[0_4px_16px_rgba(0,0,0,0.4)]">
+      <div class="flex items-start justify-between mb-4">
+        <div class="bg-[#00d4ff] bg-opacity-10 p-3 rounded-lg">
+          <svg fill="none" height="24" stroke="#00d4ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">${iconPath}</svg>
+        </div>
+        ${distanceTag}
+      </div>
+      <h3 class="text-xl font-semibold mb-2">${p.name}</h3>
+      <p class="text-[#a3a3a3] text-sm mb-4">${p.description}</p>
+      <div class="flex items-center gap-1 mb-4">
+        ${starsMarkup(p.rating)}
+        <span class="text-[#a3a3a3] text-sm ml-2">(${p.reviews} reviews)</span>
+      </div>
+      <button onclick="openDirections(${p.lat}, ${p.lng})" class="flex items-center gap-2 text-sm text-[#a3a3a3] mb-2 hover:text-[#00d4ff] transition-colors text-left">
+        <svg fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
+          <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle>
+        </svg>
+        <span class="underline decoration-dotted">${p.location}</span>
+      </button>
+      <div class="flex items-center gap-2 text-sm text-[#a3a3a3] mb-6">
+        <svg fill="none" height="16" stroke="#a3a3a3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+        </svg>
+        <span>${p.phone || 'Phone not listed — see Google Maps'}</span>
+      </div>
+      <div class="flex gap-3">
+        <button onclick="openDetails(${p.id})" class="flex-1 bg-transparent border border-[#00d4ff] text-[#00d4ff] py-3 rounded-lg font-semibold">View Profile</button>
+        <button onclick="openDirections(${p.lat}, ${p.lng})" title="Get directions" class="flex items-center justify-center gap-2 bg-[#00d4ff] text-[#0f0f0f] px-4 py-3 rounded-lg font-semibold">
+          <svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
+          </svg>
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+// Opens Google Maps, routing from the user's current GPS position (if we
+// already have it from "Near Me") straight to the provider's coordinates.
+// Falls back to just showing the destination pin if we don't have GPS yet.
+function openDirections(destLat, destLng) {
+  const destination = `${destLat},${destLng}`;
+  if (state.userCoords) {
+    const origin = `${state.userCoords.lat},${state.userCoords.lng}`;
+    window.open(`https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=driving`, '_blank');
+  } else {
+    window.open(`https://www.google.com/maps/search/?api=1&query=${destination}`, '_blank');
+  }
+}
+
+function renderChips() {
+  const cats = ["All", ...new Set(PROVIDERS.map(p => p.category))];
+  const chipsEl = document.getElementById('category-chips');
+  chipsEl.innerHTML = cats.map(c =>
+    `<button data-cat="${c}" class="chip ${c === state.category ? 'active' : ''} border border-[#2d2d2d] text-sm px-4 py-2 rounded-full text-[#a3a3a3]">${c}</button>`
+  ).join('');
+  chipsEl.querySelectorAll('.chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.category = btn.dataset.cat;
+      renderChips();
+      applyFilters();
+    });
+  });
+}
+
+function applyFilters() {
+  let results = PROVIDERS.slice();
+
+  if (state.category !== "All") {
+    results = results.filter(p => p.category === state.category);
+  }
+
+  if (state.query.trim()) {
+    const q = state.query.trim().toLowerCase();
+    results = results.filter(p =>
+      p.name.toLowerCase().includes(q) ||
+      p.category.toLowerCase().includes(q) ||
+      p.description.toLowerCase().includes(q)
+    );
+  }
+
+  if (state.location.trim()) {
+    const loc = state.location.trim().toLowerCase();
+    results = results.filter(p => p.location.toLowerCase().includes(loc));
+  }
+
+  if (state.userCoords) {
+    results.forEach(p => {
+      p._distance = haversineKm(state.userCoords.lat, state.userCoords.lng, p.lat, p.lng);
+    });
+    results.sort((a, b) => a._distance - b._distance);
+  }
+
+  renderResults(results);
+}
+
+function renderResults(results) {
+  const grid = document.getElementById('providers-grid');
+  const countLabel = document.getElementById('provider-count');
+  const emptyState = document.getElementById('empty-state');
+
+  grid.innerHTML = results.map(cardMarkup).join('');
+  countLabel.textContent = `${results.length} provider${results.length === 1 ? '' : 's'} available`;
+  emptyState.classList.toggle('hidden', results.length > 0);
+}
+
+// ---------- EVENTS ----------
+document.getElementById('search-query').addEventListener('input', (e) => {
+  state.query = e.target.value;
+  applyFilters();
+});
+
+document.getElementById('search-location').addEventListener('input', (e) => {
+  state.location = e.target.value;
+  applyFilters();
+});
+
+document.getElementById('near-me-btn').addEventListener('click', () => {
+  const statusEl = document.getElementById('gps-status');
+  statusEl.classList.remove('hidden');
+
+  if (!navigator.geolocation) {
+    statusEl.textContent = "GPS isn't available in this browser.";
+    return;
+  }
+
+  statusEl.textContent = "Getting your location…";
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      state.userCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      statusEl.textContent = "Showing providers sorted by distance from you.";
+      applyFilters();
+    },
+    (err) => {
+      statusEl.textContent = "Couldn't get your location — please allow location access and try again.";
+    }
+  );
+});
+
+// ---------- DETAILS MODAL ----------
+function openDetails(id) {
+  const p = PROVIDERS.find(x => x.id === id);
+  if (!p) return;
+
+  const distance = (state.userCoords)
+    ? `<p class="text-[#00d4ff] text-sm mb-4">${haversineKm(state.userCoords.lat, state.userCoords.lng, p.lat, p.lng).toFixed(1)} km from your location</p>`
+    : '';
+
+  document.getElementById('details-body').innerHTML = `
+    <div class="flex items-center gap-3 mb-4">
+      <div class="bg-[#00d4ff] bg-opacity-10 p-3 rounded-lg">
+        <svg fill="none" height="24" stroke="#00d4ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">${ICONS[p.icon] || ICONS.wrench}</svg>
+      </div>
+      <div>
+        <h3 class="text-xl font-bold">${p.name}</h3>
+        <span class="text-[#a3a3a3] text-sm">${p.category}</span>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-1 mb-4">
+      ${starsMarkup(p.rating)}
+      <span class="text-[#a3a3a3] text-sm ml-2">(${p.reviews.toLocaleString()} reviews)</span>
+    </div>
+
+    <p class="text-[#a3a3a3] text-sm mb-4">${p.description}</p>
+    ${distance}
+
+    <div class="border-t border-[#2d2d2d] pt-4 space-y-3">
+      <div class="flex items-start gap-3 text-sm">
+        <svg class="flex-shrink-0 mt-0.5" fill="none" height="16" stroke="#a3a3a3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
+          <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle>
+        </svg>
+        <span class="text-[#a3a3a3]">${p.address}</span>
+      </div>
+      <div class="flex items-center gap-3 text-sm">
+        <svg class="flex-shrink-0" fill="none" height="16" stroke="#a3a3a3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+        </svg>
+        ${p.phone
+          ? `<a href="tel:${p.phone.replace(/\s/g, '')}" class="text-[#00d4ff]">${p.phone}</a>`
+          : `<span class="text-[#a3a3a3]">Phone not listed — see Google Maps</span>`}
+      </div>
+    </div>
+
+    <div class="flex gap-3 mt-6">
+      ${p.phone ? `<a href="tel:${p.phone.replace(/\s/g, '')}" class="flex-1 text-center bg-transparent border border-[#00d4ff] text-[#00d4ff] py-3 rounded-lg font-semibold">Call</a>` : ''}
+      <button onclick="openDirections(${p.lat}, ${p.lng})" class="flex-1 bg-[#00d4ff] text-[#0f0f0f] py-3 rounded-lg font-semibold">Get Directions</button>
+    </div>
+  `;
+
+  document.getElementById('details-modal').classList.remove('hidden');
+}
+
+function closeDetails() {
+  document.getElementById('details-modal').classList.add('hidden');
+}
+
+// ---------- INIT ----------
+renderAuthArea();
+renderChips();
+applyFilters();
+</script>
+</body>
+</html>

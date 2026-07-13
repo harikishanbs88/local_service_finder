@@ -27,11 +27,11 @@
       </div>
       <span class="text-xl font-bold">ServiceHub</span>
     </div>
-    <div class="hidden md:flex items-center gap-8">
+    <div class="hidden md:flex items-center gap-4">
       <a class="text-[#a3a3a3]" href="#">Browse Services</a>
       <a class="text-[#a3a3a3]" href="#">How It Works</a>
       <a class="text-[#a3a3a3]" href="#">For Providers</a>
-      <button class="bg-[#00d4ff] text-[#0f0f0f] px-6 py-3 rounded-lg font-semibold">Sign In</button>
+      <div id="auth-area"></div>
     </div>
   </div>
 </nav>
@@ -120,6 +120,119 @@
   </div>
 </footer>
 
+<!-- Sign-in: choose role -->
+<div id="signin-modal" class="hidden fixed inset-0 z-[100] bg-black bg-opacity-70 flex items-center justify-center p-4" onclick="if(event.target===this) closeSignIn()">
+  <div class="bg-[#1e1e1e] border border-[#2d2d2d] rounded-2xl max-w-md w-full p-6 relative">
+    <button onclick="closeSignIn()" class="absolute top-4 right-4 text-[#a3a3a3] hover:text-white">
+      <svg fill="none" height="22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="22" xmlns="http://www.w3.org/2000/svg">
+        <path d="M18 6 6 18"></path><path d="m6 6 12 12"></path>
+      </svg>
+    </button>
+    <h3 class="text-xl font-bold mb-1">Sign In to ServiceHub</h3>
+    <p class="text-[#a3a3a3] text-sm mb-6">Choose how you want to use the app.</p>
+    <div class="space-y-3">
+      <button onclick="openSignInForm('customer')" class="w-full text-left bg-[#252525] hover:bg-[#2d2d2d] border border-[#2d2d2d] rounded-xl p-4 flex items-center gap-4 transition-colors">
+        <div class="bg-[#00d4ff] bg-opacity-10 p-3 rounded-lg">
+          <svg fill="none" height="22" stroke="#00d4ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="22" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 21a8 8 0 0 0-16 0"></path><circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </div>
+        <div>
+          <p class="font-semibold">Sign in as Customer</p>
+          <p class="text-[#a3a3a3] text-xs">Search, browse, and book local services</p>
+        </div>
+      </button>
+      <button onclick="openSignInForm('worker')" class="w-full text-left bg-[#252525] hover:bg-[#2d2d2d] border border-[#2d2d2d] rounded-xl p-4 flex items-center gap-4 transition-colors">
+        <div class="bg-[#7c3aed] bg-opacity-10 p-3 rounded-lg">
+          <svg fill="none" height="22" stroke="#c4b5fd" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="22" xmlns="http://www.w3.org/2000/svg">
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+          </svg>
+        </div>
+        <div>
+          <p class="font-semibold">Sign in as Worker</p>
+          <p class="text-[#a3a3a3] text-xs">List your service and get discovered nearby</p>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Sign-in: details form (shared for both roles) -->
+<div id="signin-form-modal" class="hidden fixed inset-0 z-[100] bg-black bg-opacity-70 flex items-center justify-center p-4" onclick="if(event.target===this) closeSignInForm()">
+  <div class="bg-[#1e1e1e] border border-[#2d2d2d] rounded-2xl max-w-md w-full p-6 relative">
+    <button onclick="closeSignInForm()" class="absolute top-4 right-4 text-[#a3a3a3] hover:text-white">
+      <svg fill="none" height="22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="22" xmlns="http://www.w3.org/2000/svg">
+        <path d="M18 6 6 18"></path><path d="m6 6 12 12"></path>
+      </svg>
+    </button>
+    <h3 id="signin-form-title" class="text-xl font-bold mb-6"></h3>
+    <form id="signin-form" onsubmit="submitSignIn(event)" class="space-y-4">
+      <div>
+        <label class="text-sm text-[#a3a3a3] block mb-1">Full name</label>
+        <input id="signin-name" required class="w-full bg-[#252525] border border-[#2d2d2d] rounded-lg py-3 px-4 text-white" type="text" placeholder="e.g., Ramesh Kumar" />
+      </div>
+      <div>
+        <label class="text-sm text-[#a3a3a3] block mb-1">Phone number</label>
+        <input id="signin-phone" required class="w-full bg-[#252525] border border-[#2d2d2d] rounded-lg py-3 px-4 text-white" type="tel" placeholder="+91 90000 00000" />
+      </div>
+      <button type="submit" class="w-full bg-[#00d4ff] text-[#0f0f0f] py-3 rounded-lg font-semibold mt-2">Continue</button>
+    </form>
+  </div>
+</div>
+
+<!-- Worker: add my service listing -->
+<div id="add-listing-modal" class="hidden fixed inset-0 z-[100] bg-black bg-opacity-70 flex items-center justify-center p-4" onclick="if(event.target===this) closeAddListing()">
+  <div class="bg-[#1e1e1e] border border-[#2d2d2d] rounded-2xl max-w-md w-full p-6 relative max-h-[85vh] overflow-y-auto">
+    <button onclick="closeAddListing()" class="absolute top-4 right-4 text-[#a3a3a3] hover:text-white">
+      <svg fill="none" height="22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="22" xmlns="http://www.w3.org/2000/svg">
+        <path d="M18 6 6 18"></path><path d="m6 6 12 12"></path>
+      </svg>
+    </button>
+    <h3 class="text-xl font-bold mb-1">List Your Service</h3>
+    <p class="text-[#a3a3a3] text-sm mb-6">This adds a real card to the grid below, using your live location.</p>
+    <form id="add-listing-form" onsubmit="submitAddListing(event)" class="space-y-4">
+      <div>
+        <label class="text-sm text-[#a3a3a3] block mb-1">Business / service name</label>
+        <input id="listing-name" required class="w-full bg-[#252525] border border-[#2d2d2d] rounded-lg py-3 px-4 text-white" type="text" placeholder="e.g., Ramesh Plumbing Works" />
+      </div>
+      <div>
+        <label class="text-sm text-[#a3a3a3] block mb-1">Category</label>
+        <select id="listing-category" required class="w-full bg-[#252525] border border-[#2d2d2d] rounded-lg py-3 px-4 text-white">
+          <option value="Plumbing">Plumbing</option>
+          <option value="Electrical">Electrical</option>
+          <option value="Carpentry">Carpentry</option>
+          <option value="HVAC">HVAC</option>
+          <option value="Painting">Painting</option>
+          <option value="Cleaning">Cleaning</option>
+          <option value="Locksmith">Locksmith</option>
+          <option value="Roofing">Roofing</option>
+          <option value="Pest Control">Pest Control</option>
+          <option value="Appliance Repair">Appliance Repair</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-sm text-[#a3a3a3] block mb-1">Short description</label>
+        <input id="listing-description" required class="w-full bg-[#252525] border border-[#2d2d2d] rounded-lg py-3 px-4 text-white" type="text" placeholder="One line about what you offer" />
+      </div>
+      <div>
+        <label class="text-sm text-[#a3a3a3] block mb-1">Area / locality</label>
+        <input id="listing-location" required class="w-full bg-[#252525] border border-[#2d2d2d] rounded-lg py-3 px-4 text-white" type="text" placeholder="e.g., Whitefield, Bengaluru" />
+      </div>
+      <div>
+        <label class="text-sm text-[#a3a3a3] block mb-1">Full address</label>
+        <input id="listing-address" required class="w-full bg-[#252525] border border-[#2d2d2d] rounded-lg py-3 px-4 text-white" type="text" placeholder="Shop / house no., street, area, city, PIN" />
+      </div>
+      <div>
+        <button type="button" onclick="useMyLocationForListing()" class="w-full flex items-center justify-center gap-2 bg-transparent border border-[#00d4ff] text-[#00d4ff] py-3 rounded-lg font-semibold text-sm">
+          Use My Current GPS Location
+        </button>
+        <p id="listing-coords-status" class="text-xs text-[#666] mt-2"></p>
+      </div>
+      <button type="submit" class="w-full bg-[#00d4ff] text-[#0f0f0f] py-3 rounded-lg font-semibold mt-2">Publish Listing</button>
+    </form>
+  </div>
+</div>
+
 <!-- Details modal -->
 <div id="details-modal" class="hidden fixed inset-0 z-[100] bg-black bg-opacity-70 flex items-center justify-center p-4" onclick="if(event.target===this) closeDetails()">
   <div class="bg-[#1e1e1e] border border-[#2d2d2d] rounded-2xl max-w-lg w-full p-6 relative max-h-[85vh] overflow-y-auto">
@@ -172,8 +285,148 @@ const ICONS = {
   search: '<circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path>',
 };
 
+const ICON_BY_CATEGORY = {
+  "Plumbing": "wrench",
+  "Electrical": "bolt",
+  "Carpentry": "layout",
+  "HVAC": "snowflake",
+  "Painting": "home",
+  "Cleaning": "target",
+  "Locksmith": "lock",
+  "Roofing": "search",
+  "Pest Control": "plus",
+  "Appliance Repair": "target",
+};
+
 // ---------- STATE ----------
 let state = { query: "", location: "", category: "All", userCoords: null };
+
+// ---------- AUTH ----------
+let session = null; // { role: 'customer' | 'worker', name, phone }
+try {
+  const saved = localStorage.getItem('servicehub_session');
+  if (saved) session = JSON.parse(saved);
+} catch (e) { /* ignore corrupt storage */ }
+
+let pendingRole = null; // role chosen in the first sign-in modal, before the form
+
+function renderAuthArea() {
+  const el = document.getElementById('auth-area');
+  if (!session) {
+    el.innerHTML = `<button onclick="openSignIn()" class="bg-[#00d4ff] text-[#0f0f0f] px-6 py-3 rounded-lg font-semibold">Sign In</button>`;
+    return;
+  }
+
+  const roleLabel = session.role === 'worker' ? 'Worker' : 'Customer';
+  const roleColor = session.role === 'worker' ? 'text-[#c4b5fd]' : 'text-[#00d4ff]';
+  const listButton = session.role === 'worker'
+    ? `<button onclick="openAddListing()" class="bg-[#00d4ff] text-[#0f0f0f] px-4 py-2.5 rounded-lg font-semibold text-sm">+ List My Service</button>`
+    : '';
+
+  el.innerHTML = `
+    <div class="flex items-center gap-3">
+      ${listButton}
+      <div class="text-right leading-tight">
+        <p class="text-sm font-semibold">${session.name}</p>
+        <p class="text-xs ${roleColor}">${roleLabel}</p>
+      </div>
+      <button onclick="signOut()" title="Sign out" class="text-[#a3a3a3] hover:text-white">
+        <svg fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line>
+        </svg>
+      </button>
+    </div>
+  `;
+}
+
+function openSignIn() { document.getElementById('signin-modal').classList.remove('hidden'); }
+function closeSignIn() { document.getElementById('signin-modal').classList.add('hidden'); }
+
+function openSignInForm(role) {
+  pendingRole = role;
+  closeSignIn();
+  document.getElementById('signin-form-title').textContent =
+    role === 'worker' ? 'Sign in as Worker' : 'Sign in as Customer';
+  document.getElementById('signin-form').reset();
+  document.getElementById('signin-form-modal').classList.remove('hidden');
+}
+function closeSignInForm() { document.getElementById('signin-form-modal').classList.add('hidden'); }
+
+function submitSignIn(e) {
+  e.preventDefault();
+  const name = document.getElementById('signin-name').value.trim();
+  const phone = document.getElementById('signin-phone').value.trim();
+  if (!name || !phone) return;
+
+  session = { role: pendingRole, name, phone };
+  try { localStorage.setItem('servicehub_session', JSON.stringify(session)); } catch (e) {}
+
+  closeSignInForm();
+  renderAuthArea();
+}
+
+function signOut() {
+  session = null;
+  try { localStorage.removeItem('servicehub_session'); } catch (e) {}
+  renderAuthArea();
+}
+
+// ---------- WORKER: ADD LISTING ----------
+let listingCoords = null;
+
+function openAddListing() {
+  listingCoords = null;
+  document.getElementById('listing-coords-status').textContent = '';
+  document.getElementById('add-listing-form').reset();
+  document.getElementById('add-listing-modal').classList.remove('hidden');
+}
+function closeAddListing() { document.getElementById('add-listing-modal').classList.add('hidden'); }
+
+function useMyLocationForListing() {
+  const statusEl = document.getElementById('listing-coords-status');
+  if (!navigator.geolocation) {
+    statusEl.textContent = "GPS isn't available in this browser.";
+    return;
+  }
+  statusEl.textContent = "Getting your location…";
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      listingCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      statusEl.textContent = `Location captured (${listingCoords.lat.toFixed(4)}, ${listingCoords.lng.toFixed(4)}).`;
+    },
+    () => { statusEl.textContent = "Couldn't get your location — please allow location access."; }
+  );
+}
+
+function submitAddListing(e) {
+  e.preventDefault();
+  if (!listingCoords) {
+    document.getElementById('listing-coords-status').textContent =
+      "Please tap 'Use My Current GPS Location' first so customers can find you nearby.";
+    return;
+  }
+
+  const nextId = Math.max(...PROVIDERS.map(p => p.id)) + 1;
+  PROVIDERS.push({
+    id: nextId,
+    name: document.getElementById('listing-name').value.trim(),
+    category: document.getElementById('listing-category').value,
+    description: document.getElementById('listing-description').value.trim(),
+    rating: 0,
+    reviews: 0,
+    location: document.getElementById('listing-location').value.trim(),
+    address: document.getElementById('listing-address').value.trim(),
+    phone: session.phone,
+    icon: ICON_BY_CATEGORY[document.getElementById('listing-category').value] || 'wrench',
+    lat: listingCoords.lat,
+    lng: listingCoords.lng,
+  });
+
+  closeAddListing();
+  renderChips();
+  applyFilters();
+}
+
 
 // ---------- HELPERS ----------
 function haversineKm(lat1, lon1, lat2, lon2) {
@@ -397,6 +650,7 @@ function closeDetails() {
 }
 
 // ---------- INIT ----------
+renderAuthArea();
 renderChips();
 applyFilters();
 </script>
